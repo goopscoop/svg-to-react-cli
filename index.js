@@ -289,20 +289,62 @@ const createComponentName = (fileName, file) => {
   return componentNameArr.join('');
 };
 
+const addFlavor = (i) => {
+  const rand = Math.random() * (100 - 1) + 1;
+
+  if (rand < 10) {
+    console.log('Whew, I might break a sweat.');
+  }
+
+  if (rand < 20) {
+    console.log(`You're not kidding around here!`);
+  }
+
+  if (rand < 30) {
+    console.log(`If you tell your boss you processed all these files this quickly, you might get a raise. Won't hurt anyway.`)
+  }
+
+  if (rand < 40) {
+    console.log(`Processing this many files makes me horny--er, tired. I meant tired.`);
+  }
+
+  if (rand < 50) {
+    console.log(`Read "The Name of the Wind" by Patrick Rothfuss.`);
+  }
+
+  if (rand < 60) {
+    console.log(`If you haven't watched Ip Man, you owe it to yourself to. Great movie.`);
+  }
+
+  if (rand < 70) {
+    console.log(`Another suprisingly good movie... Dredd starring Karl Urban. So good!`);
+  }
+
+  if (rand < 80) {
+    console.log(`Tonights date movie... The Raid.`)
+  }
+
+  console.log(`If you like metal, listen to the Fear Before the March of Flames album "The Always Open Mouth". Best album ever, but no one listens to it.`)
+}
+
 const runUtilForAllInDir = () => {
   fs.readdir(process.cwd(), (err, files) => {
     if (err) {
       return console.log(err);
     }
+    let fileCount = 0;
 
-    files.forEach(file => {
+    files.forEach((file, i) => {
       if (path.extname(file) === '.svg') {
-        const fileName = path.basename(file)
+        const fileName = path.basename(file);
         const componentName = createComponentName(fileName, file);
 
         runUtil(fileName, componentName);
+        fileCount++;
       }
     });
+    console.log(`${fileCount} files created. Dude, that must be some kind of record.`);
+    addFlavor(i);
   });
 };
 
@@ -314,5 +356,6 @@ if (firstArg === 'dir') {
   runUtilForAllInDir();
 } else {
   runUtil(svg);
+  addFlavor(i);
 }
 
