@@ -1,4 +1,4 @@
-# svg-to-react
+# svg-to-react-cli
 A command line utility that takes a svg image file and outputs a fully formatted stateless functional React component file that can be used to render your image.
 
 ## To Use
