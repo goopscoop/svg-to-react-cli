@@ -42,7 +42,7 @@ import React from 'react';
 
 export default function NewThing({width, height}) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style={height: "512px", width: "512px" height={height} width={width}}>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style={height: "512px", width: "512px"} height={height} width={width}>
   <defs>
     <filter id="glow">
       <feGaussianBlur stdDeviation="7" result="coloredBlur"></feGaussianBlur>
