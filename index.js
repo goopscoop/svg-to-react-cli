@@ -5,18 +5,6 @@
 const fs = require('fs');
 var path = require('path');
 
-const firstArg = process.argv[2];
-if (firstArg === 'help') {
-  console.log(helptext);
-  return;
-}
-
-if (firstArg === 'example') {
-  console.log(exampleText);
-  return;
-}
-
-const svg = `./${firstArg}.svg`;
 const newFileName = process.argv[3] || 'MyComponent';
 const outputIndex = process.argv.indexOf('output');
 const outputPath = outputIndex !== -1 ? process.argv[outputIndex + 1] : false;
@@ -89,15 +77,31 @@ mind was blown by how much time you just saved, then be
 sure to tell a friend about this util!
 `;
 
+const firstArg = process.argv[2];
+if (firstArg === 'help') {
+  console.log(helptext);
+  return;
+}
 
+if (firstArg === 'example') {
+  console.log(exampleText);
+  return;
+}
+
+const svg = `./${firstArg}.svg`;
 
 const generateComponent = svgOutput => `
 import React from 'react';
 
-export default function ${newFileName}({width, height}) {
+export default function ${newFileName}({width = '50px', height = '50px'}) {
   return (
     ${svgOutput}
   );
+}
+
+${newFileName}.propTypes = {
+  width: React.PropTypes.string,
+  height: React.PropTypes.string
 }
 `;
 
@@ -225,7 +229,7 @@ const processSVGTags = data => {
   const addHeightAndWidth = (i) => {
     if (isFirstTag && dataArr[i] === '>') {
       isFirstTag = !isFirstTag;
-      dataArr.splice(i - 1, 0, ' height={height} width={width}');
+      dataArr.splice(i, 0, ' height={height} width={width}');
     }
   }
 
