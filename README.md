@@ -4,18 +4,25 @@ A command line utility that takes a svg image file and outputs a fully formatted
 ## To Use
 `npm install -g react-to-svg-cli`
 
-then
+then for a single file:
 
 `svgtoreact <svgImage> <ComponentName>`
 
-NOTE: image file must be in current working directory. Do not add the extention. If file is `image.svg`, then just enter `image` as the first argument.
+or for all files in directory (will name all components in CamelCase based on image name. If image is `image.svg` then new component will be `Image` and file will be `Image.js`):
+
+`svgtoreact dir`
+
+**NOTE**: image file must be in current working directory. Do not add the extention. If file is `image.svg`, then just enter `image` as the first argument.
 
 Or use flags: `svgtoreact <svgImage> <ComponentName> output ./components/svgComponents/ no-indentation`
   
-Optional Flags:
+**Optional Flags:**
 `output <path>` .... the output path. Do not include the filename.
+
 `no-format` ........ will skip line breaks and indentation to svg. If your svg is already formatted, use this flag.
+
 `help` ............. Prints out this readme.
+
 `example` .......... Prints an example of the i/o of this util.
 
 ## Example

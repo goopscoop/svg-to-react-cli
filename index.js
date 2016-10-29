@@ -14,30 +14,33 @@ const isFormatting = process.argv.indexOf('no-format') === -1;
 // svgtoreact MyImage MyComponent /foo/bar/
 
 const helptext = `
-  Welcome to SVG to React. This tool takes a svg file and outputs
-  a full formated stateless functional React component. The
-  component has two props, height and width.
+Welcome to SVG to React. This tool takes a svg file and outputs
+a full formated stateless functional React component. The
+component has two props, height and width.
 
-  Sample command: svgtoreact svgImage ComponentName
-  Advanced sample command: svgtoreact svgImage ComponentName output ./components/svgComponents/ no-indentation
+Sample command: svgtoreact svgImage ComponentName
+Advanced sample command: svgtoreact svgImage ComponentName output ./components/svgComponents/ no-indentation
 
-  Required Arguments:
-    first ............ the name of the svg file. If in working
-                       directory, the path and extention are not
-                       required.
-    second ........... the name of the component. This will be the
-                       function name as well as the file name (with
-                       .js prepended)
-  
-  Optional Flags:
-    output <path> .... the output path. Do not include the filename.
-    no-format ........ will skip line breaks and indentation to svg.
-                       If your svg is already formatted, use this flag.
-    help ............. you got here on your own, didn't you?
-    example .......... output an example of the i/o of this util.
+Required Arguments:
+  For Single File -
+  first ............ the name of the svg file. If in working
+                     directory, the path and extention are not
+                     required.
+  second ........... the name of the component. This will be the
+                     function name as well as the file name (with
+                     .js prepended)
+  For Multi File -
+    svgtoreact dir - run util off all .svg's in curent working directory
 
-    **Created by Cody Barrus gitHub: goopscoop**
-    repo: https://github.com/goopscoop/svg-to-react
+Optional Flags:
+  output <path> .... the output path. Do not include the filename.
+  no-format ........ will skip line breaks and indentation to svg.
+                     If your svg is already formatted, use this flag.
+  help ............. you got here on your own, didn't you?
+  example .......... output an example of the i/o of this util.
+
+  **Created by Cody Barrus gitHub: goopscoop**
+  repo: https://github.com/goopscoop/svg-to-react
 `;
 
 const exampleText = `
@@ -246,28 +249,70 @@ const processSVGTags = data => {
   return dataArr.join('');
 };
 
-const writeFile = (processedSVG) => {
+const writeFile = (processedSVG, fileName) => {
   let file;
 
   if (outputPath){
-    file = path.resolve(process.cwd(), outputPath, `${newFileName}.js`);
+    file = path.resolve(process.cwd(), outputPath, `${fileName}.js`);
   } else {
-    file = path.resolve(process.cwd(), `${newFileName}.js`);
+    file = path.resolve(process.cwd(), `${fileName}.js`);
   }
   fs.writeFile(file, processedSVG, function (err) {
       if (err) {    
           return console.log(err);
       }
-      console.log(processCompleteText)
       console.log('File written to -> ' + file);
   });
+};
+
+const runUtil = (fileToRead, fileToWrite) => {
+  fs.readFile(fileToRead, 'utf8', function (err, file) {
+    if (err) {
+      return console.log(err);
+    }
+
+    const processedSVG = generateComponent(formatSVG(processSVGTags(file)));
+    writeFile(processedSVG, fileToWrite);
+  });
+};
+
+const createComponentName = (fileName, file) => {
+  let componentNamePrep;
+
+  if (fileName.indexOf('-') !== - 1) {
+    componentNamePrep = snakeToCamel(path.basename(file, '.svg'));
+  } else {
+    componentNamePrep = path.basename(file, '.svg');
+  }
+  const componentNameArr = componentNamePrep.split('');
+  componentNameArr[0] = componentNameArr[0].toUpperCase();
+  return componentNameArr.join('');
+};
+
+const runUtilForAllInDir = () => {
+  fs.readdir(process.cwd(), (err, files) => {
+    if (err) {
+      return console.log(err);
+    }
+
+    files.forEach(file => {
+      if (path.extname(file) === '.svg') {
+        const fileName = path.basename(file)
+        const componentName = createComponentName(fileName, file);
+
+        runUtil(fileName, componentName);
+      }
+    });
+  });
+};
+
+function snakeToCamel(s){
+    return s.replace(/(\-\w)/g, function(m){return m[1].toUpperCase();});
 }
 
-fs.readFile(svg, 'utf8', function (err,data) {
-  if (err) {
-    return console.log(err);
-  }
+if (firstArg === 'dir') {
+  runUtilForAllInDir();
+} else {
+  runUtil(svg);
+}
 
-  const processedSVG = generateComponent(formatSVG(processSVGTags(data)));
-  writeFile(processedSVG);
-});
