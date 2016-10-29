@@ -5,7 +5,15 @@
 const fs = require('fs');
 var path = require('path');
 
-const newFileName = process.argv[3] || 'MyComponent';
+const rmStyle = process.argv.indexOf('rm-style') !== -1;
+const firstArg = process.argv[2];
+
+let newFileName;
+if (firstArg !== 'dir'){
+  // else create file name in runUtilForAllInDir
+  newFileName = process.argv[3] || 'MyComponent';
+} 
+
 const outputIndex = process.argv.indexOf('output');
 const outputPath = outputIndex !== -1 ? process.argv[outputIndex + 1] : false;
 const isFormatting = process.argv.indexOf('no-format') === -1;
@@ -36,6 +44,7 @@ Optional Flags:
   output <path> .... the output path. Do not include the filename.
   no-format ........ will skip line breaks and indentation to svg.
                      If your svg is already formatted, use this flag.
+  rm-style ......... removes all style tags within svg.
   help ............. you got here on your own, didn't you?
   example .......... output an example of the i/o of this util.
 
@@ -80,7 +89,6 @@ mind was blown by how much time you just saved, then be
 sure to tell a friend about this util!
 `;
 
-const firstArg = process.argv[2];
 if (firstArg === 'help') {
   console.log(helptext);
   return;
@@ -93,16 +101,15 @@ if (firstArg === 'example') {
 
 const svg = `./${firstArg}.svg`;
 
-const generateComponent = svgOutput => `
-import React from 'react';
+const generateComponent = (svgOutput, componentName) => `import React from 'react';
 
-export default function ${newFileName}({width = '50px', height = '50px'}) {
+export default function ${componentName}({width = '50px', height = '50px'}) {
   return (
     ${svgOutput}
   );
 }
 
-${newFileName}.propTypes = {
+${componentName}.propTypes = {
   width: React.PropTypes.string,
   height: React.PropTypes.string
 }
@@ -188,7 +195,23 @@ const processSVGTags = data => {
     return dataArr[i] === 's' && dataArr[i + 1] === 't' &&
       dataArr[i + 2] === 'y' && dataArr[i + 3] === 'l' &&
       dataArr[i + 4] === 'e' && dataArr[i + 5] === '=' 
-  }
+  };
+
+  const removeStyle = (i) => {
+    let quotes = 0;
+    let isComplete = false;
+
+    for (let y = JSON.parse(JSON.stringify(i)); !isComplete; y++){
+      if(dataArr[y] === '"') {
+        quotes++;
+      }
+
+      if (quotes === 2) {
+        dataArr.splice(i, y - i + 2);
+        isComplete = true;
+      }
+    }
+  };
 
   const changeStyleToObj = (i) => {
     let isComplete = false;
@@ -197,7 +220,7 @@ const processSVGTags = data => {
     const turnQuoteToCurly = (y) => {
       if (dataArr[y] === `"`) {
         quotes++;
-        dataArr[y] = quotes === 1 ? `{` : `}`;
+        dataArr[y] = quotes === 1 ? `{{` : `}}`;
         if (quotes === 2) {
           dataArr.splice(y - 1, 1);
         }
@@ -215,7 +238,7 @@ const processSVGTags = data => {
         dataArr[y] = '"';
         dataArr.splice(y + 1, 0, ',');
       }
-    }
+    };
 
     for (let y = JSON.parse(JSON.stringify(i)); !isComplete; y++){
       turnQuoteToCurly(y);
@@ -227,18 +250,26 @@ const processSVGTags = data => {
         isComplete = true;
       }
     }
-  }
+  };
 
   const addHeightAndWidth = (i) => {
     if (isFirstTag && dataArr[i] === '>') {
       isFirstTag = !isFirstTag;
       dataArr.splice(i, 0, ' height={height} width={width}');
     }
-  }
+  };
+
+  const changeOrRemoveStyle = (i) => {
+    if (rmStyle) {
+      removeStyle(i);
+      return;
+    }
+    changeStyleToObj(i);
+  };
 
   for (let i = 0; i < dataArr.length; i++ ) {
     if ( !inQuotes && isStyleAttribute(i)) {
-      changeStyleToObj(i);
+      changeOrRemoveStyle(i)
     }
 
     addHeightAndWidth(i)
@@ -271,12 +302,12 @@ const runUtil = (fileToRead, fileToWrite) => {
       return console.log(err);
     }
 
-    const processedSVG = generateComponent(formatSVG(processSVGTags(file)));
+    const processedSVG = generateComponent(formatSVG(processSVGTags(file)), fileToWrite);
     writeFile(processedSVG, fileToWrite);
   });
 };
 
-const createComponentName = (fileName, file) => {
+const createComponentName = (file, fileName) => {
   let componentNamePrep;
 
   if (fileName.indexOf('-') !== - 1) {
@@ -289,44 +320,6 @@ const createComponentName = (fileName, file) => {
   return componentNameArr.join('');
 };
 
-const addFlavor = (i) => {
-  const rand = Math.random() * (100 - 1) + 1;
-
-  if (rand < 10) {
-    console.log('Whew, I might break a sweat.');
-  }
-
-  if (rand < 20) {
-    console.log(`You're not kidding around here!`);
-  }
-
-  if (rand < 30) {
-    console.log(`If you tell your boss you processed all these files this quickly, you might get a raise. Won't hurt anyway.`)
-  }
-
-  if (rand < 40) {
-    console.log(`Processing this many files makes me horny--er, tired. I meant tired.`);
-  }
-
-  if (rand < 50) {
-    console.log(`Read "The Name of the Wind" by Patrick Rothfuss.`);
-  }
-
-  if (rand < 60) {
-    console.log(`If you haven't watched Ip Man, you owe it to yourself to. Great movie.`);
-  }
-
-  if (rand < 70) {
-    console.log(`Another suprisingly good movie... Dredd starring Karl Urban. So good!`);
-  }
-
-  if (rand < 80) {
-    console.log(`Tonights date movie... The Raid.`)
-  }
-
-  console.log(`If you like metal, listen to the Fear Before the March of Flames album "The Always Open Mouth". Best album ever, but no one listens to it.`)
-}
-
 const runUtilForAllInDir = () => {
   fs.readdir(process.cwd(), (err, files) => {
     if (err) {
@@ -335,16 +328,20 @@ const runUtilForAllInDir = () => {
     let fileCount = 0;
 
     files.forEach((file, i) => {
-      if (path.extname(file) === '.svg') {
-        const fileName = path.basename(file);
-        const componentName = createComponentName(fileName, file);
+      const extention = path.extname(file);
+      const fileName = path.basename(file);
 
+      if (extention === '.svg') {
+        // variable instantiated up top
+        const componentName = createComponentName(file, fileName);
         runUtil(fileName, componentName);
         fileCount++;
       }
     });
-    console.log(`${fileCount} files created. Dude, that must be some kind of record.`);
-    addFlavor(i);
+
+    console.log(`${fileCount} files created. That must be some kind of record.
+
+      `);
   });
 };
 
@@ -355,7 +352,6 @@ function snakeToCamel(s){
 if (firstArg === 'dir') {
   runUtilForAllInDir();
 } else {
-  runUtil(svg);
-  addFlavor(i);
+  runUtil(svg, newFileName);
 }
 
