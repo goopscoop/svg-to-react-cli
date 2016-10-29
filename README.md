@@ -10,13 +10,14 @@ then for a single file:
 
 `svgtoreact <svgImage> <ComponentName>`
 
+**NOTE**: image file must be in current working directory. Do not add the extention. If file is `image.svg`, then just enter `image` as the first argument. ComponentName will be the name of the sfc and filename with `.js` appended.
+
 ### Multi File
 
 or for all files in directory (will name all components in CamelCase based on image name. If image is `image.svg` then new component will be `Image` and file will be `Image.js`):
 
 `svgtoreact dir`
 
-**NOTE**: image file must be in current working directory. Do not add the extention. If file is `image.svg`, then just enter `image` as the first argument.
 
 Or use flags: `svgtoreact <svgImage> <ComponentName> output ./components/svgComponents/ no-indentation`
   
