@@ -1,0 +1,27 @@
+{
+  "name": "svg-to-react",
+  "version": "1.0.0",
+  "description": "A command line utility that takes a svg image file and outputs a fully formatted stateless functional React component file that can be used to render your image.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/goopscoop/svg-to-react.git"
+  },
+  "keywords": [
+    "react",
+    "svg",
+    "component"
+  ],
+  "author": "goopscoop <codybarrus@gmail.com> (http://codybarrus.com)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/goopscoop/svg-to-react/issues"
+  },
+  "homepage": "https://github.com/goopscoop/svg-to-react#readme",
+  "bin": {
+    "svgtoreact": "./index.js"
+  }
+}
