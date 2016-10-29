@@ -31,8 +31,7 @@ const helptext = `
   component has two props, height and width.
 
   Sample command: svgtoreact svgImage ComponentName
-  Advanced sample command: svgtoreact ../assets/svgImage.svg
-  ComponentName output ./components/svgComponents/ no-indentation
+  Advanced sample command: svgtoreact svgImage ComponentName output ./components/svgComponents/ no-indentation
 
   Required Arguments:
     first ............ the name of the svg file. If in working
