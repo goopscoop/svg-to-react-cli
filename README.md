@@ -19,7 +19,7 @@ or for all files in directory (will name all components in CamelCase based on im
 
 ## Flags
 
-Or use flags: `svgtoreact <svgImage> <ComponentName> output ./components/svgComponents/ no-indentation`
+Or use flags: `svgtoreact <svgImage> <ComponentName> output ./components/svgComponents/ no-format rm-style`
   
 **Optional Flags:**
 

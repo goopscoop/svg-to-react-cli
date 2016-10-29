@@ -27,7 +27,7 @@ a full formated stateless functional React component. The
 component has two props, height and width.
 
 Sample command: svgtoreact svgImage ComponentName
-Advanced sample command: svgtoreact svgImage ComponentName output ./components/svgComponents/ no-indentation
+Advanced sample command: svgtoreact svgImage ComponentName output ./components/svgComponents/ no-format rm-style
 
 Required Arguments:
   For Single File -
