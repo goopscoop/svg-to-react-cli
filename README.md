@@ -4,9 +4,13 @@ A command line utility that takes a svg image file and outputs a fully formatted
 ## To Use
 `npm install -g react-to-svg-cli`
 
+### One File
+
 then for a single file:
 
 `svgtoreact <svgImage> <ComponentName>`
+
+### Multi File
 
 or for all files in directory (will name all components in CamelCase based on image name. If image is `image.svg` then new component will be `Image` and file will be `Image.js`):
 
