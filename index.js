@@ -17,6 +17,7 @@ if (firstArg !== 'dir'){
 const outputIndex = process.argv.indexOf('output');
 const outputPath = outputIndex !== -1 ? process.argv[outputIndex + 1] : false;
 const isFormatting = process.argv.indexOf('no-format') === -1;
+let fileCount = 0;
 
 // sample command
 // svgtoreact MyImage MyComponent /foo/bar/
@@ -85,8 +86,8 @@ const exampleText = `
 
 const processCompleteText = `
 Process complete! Thanks for using SVG to React. If your 
-mind was blown by how much time you just saved, then be
-sure to tell a friend about this util!
+mind was blown, even a little bit, then be sure to tell
+a friend about svg-to-react-cli!
 `;
 
 if (firstArg === 'help') {
@@ -282,6 +283,7 @@ const processSVGTags = data => {
 
 const writeFile = (processedSVG, fileName) => {
   let file;
+  let filesWritten = 0;
 
   if (outputPath){
     file = path.resolve(process.cwd(), outputPath, `${fileName}.js`);
@@ -289,10 +291,22 @@ const writeFile = (processedSVG, fileName) => {
     file = path.resolve(process.cwd(), `${fileName}.js`);
   }
   fs.writeFile(file, processedSVG, function (err) {
+    filesWritten++;
       if (err) {    
           return console.log(err);
       }
+
       console.log('File written to -> ' + file);
+
+      if (filesWritten === fileCount) {
+        console.log(`
+
+          ${filesWritten} components created. That must be some kind of record;
+
+          ${processCompleteText}
+          `)
+
+      }
   });
 };
 
@@ -325,7 +339,6 @@ const runUtilForAllInDir = () => {
     if (err) {
       return console.log(err);
     }
-    let fileCount = 0;
 
     files.forEach((file, i) => {
       const extention = path.extname(file);
@@ -338,10 +351,6 @@ const runUtilForAllInDir = () => {
         fileCount++;
       }
     });
-
-    console.log(`${fileCount} files created. That must be some kind of record.
-
-      `);
   });
 };
 
@@ -352,6 +361,7 @@ function snakeToCamel(s){
 if (firstArg === 'dir') {
   runUtilForAllInDir();
 } else {
+  fileCount++;
   runUtil(svg, newFileName);
 }
 
