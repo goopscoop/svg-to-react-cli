@@ -20,18 +20,18 @@ or for all files in directory (will name all components in CamelCase based on im
 ## Flags
 
 Or use flags: `svgtoreact <svgImage> <ComponentName> output ./components/svgComponents/ no-format rm-style`
-  
+
 **Optional Flags:**
 
-`output <path>` - the output path. Do not include the filename.
+`-o, --output <path>` - the output path. Do not include the filename.
 
-`no-format` - will skip line breaks and indentation to svg. If your svg is already formatted, use this flag.
+`--no-format` - will skip line breaks and indentation to svg. If your svg is already formatted, use this flag.
 
-`rm-style` - removes all style attributes from svg tags.
+`--rm-style` - removes all style attributes from svg tags.
 
-`help` - Prints out this readme.
+`--help` - Prints out this readme.
 
-`example` - Prints an example of the i/o of this util.
+`--example` - Prints an example of the i/o of this util.
 
 ## Example
 
