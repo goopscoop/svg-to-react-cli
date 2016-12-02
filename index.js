@@ -4,19 +4,30 @@
 
 const fs = require('fs');
 var path = require('path');
+const chalk = require('chalk');
+const args = require('minimist')(process.argv.slice(2), {
+  alias: {
+    o: 'output',
+  },
+  default: {
+    o: false,
+    'no-format': false,
+    'rm-style': false,
+    force: false,
+  }
+});
 
-const rmStyle = process.argv.indexOf('rm-style') !== -1;
-const firstArg = process.argv[2];
+const rmStyle = args['rm-style'];
+const firstArg = args._[0];
 
 let newFileName;
 if (firstArg !== 'dir'){
   // else create file name in runUtilForAllInDir
-  newFileName = process.argv[3] || 'MyComponent';
-} 
+  newFileName = args._[1] || 'MyComponent';
+}
 
-const outputIndex = process.argv.indexOf('output');
-const outputPath = outputIndex !== -1 ? process.argv[outputIndex + 1] : false;
-const isFormatting = process.argv.indexOf('no-format') === -1;
+const outputPath = args.output;
+const isFormatting = ! args['no-format'];
 let fileCount = 0;
 
 // sample command
@@ -32,22 +43,23 @@ Advanced sample command: svgtoreact svgImage ComponentName output ./components/s
 
 Required Arguments:
   For Single File -
-  first ............ the name of the svg file. If in working
-                     directory, the path and extention are not
-                     required.
-  second ........... the name of the component. This will be the
-                     function name as well as the file name (with
-                     .js prepended)
+  first .................. the name of the svg file. If in working
+                           directory, the path and extention are not
+                           required.
+  second ................. the name of the component. This will be the
+                           function name as well as the file name (with
+                           .js prepended)
   For Multi File -
     svgtoreact dir - run util off all .svg's in curent working directory
 
 Optional Flags:
-  output <path> .... the output path. Do not include the filename.
-  no-format ........ will skip line breaks and indentation to svg.
-                     If your svg is already formatted, use this flag.
-  rm-style ......... removes all style tags within svg.
-  help ............. you got here on your own, didn't you?
-  example .......... output an example of the i/o of this util.
+  -o, --output <path> .... the output path. Do not include the filename.
+      --no-format ........ will skip line breaks and indentation to svg.
+                           If your svg is already formatted, use this flag.
+      --rm-style ......... removes all style tags within svg.
+      --force ............ Writes the ouptut file even if it exists.
+      --help ............. you got here on your own, didn't you?
+      --example .......... output an example of the i/o of this util.
 
   **Created by Cody Barrus gitHub: goopscoop**
   repo: https://github.com/goopscoop/svg-to-react
@@ -85,19 +97,19 @@ const exampleText = `
 `;
 
 const processCompleteText = `
-Process complete! Thanks for using SVG to React. If your 
+Process complete! Thanks for using SVG to React. If your
 mind was blown, even a little bit, then be sure to tell
 a friend about svg-to-react-cli!
 `;
 
-if (firstArg === 'help') {
+if (args.help) {
   console.log(helptext);
-  return;
+  process.exit(1);
 }
 
-if (firstArg === 'example') {
+if (args.example) {
   console.log(exampleText);
-  return;
+  process.exit(1);
 }
 
 const svg = `./${firstArg}.svg`;
@@ -131,7 +143,7 @@ const formatSVG = function (svg) {
   const lines = svg.split('\n');
   let indent = 0;
   let lastType = 'other';
-  // 4 types of tags - single, closing, opening, other (text, doctype, comment) - 4*4 = 16 transitions 
+  // 4 types of tags - single, closing, opening, other (text, doctype, comment) - 4*4 = 16 transitions
   const transitions = {
       'single->single': 0,
       'single->closing': -1,
@@ -171,7 +183,7 @@ const formatSVG = function (svg) {
           formatted += padding + ln + '\n';
   }
 
-  return formatted; 
+  return formatted;
 };
 
 const processSVGTags = data => {
@@ -195,7 +207,7 @@ const processSVGTags = data => {
   const isStyleAttribute = (i) => {
     return dataArr[i] === 's' && dataArr[i + 1] === 't' &&
       dataArr[i + 2] === 'y' && dataArr[i + 3] === 'l' &&
-      dataArr[i + 4] === 'e' && dataArr[i + 5] === '=' 
+      dataArr[i + 4] === 'e' && dataArr[i + 5] === '='
   };
 
   const removeStyle = (i) => {
@@ -290,30 +302,34 @@ const writeFile = (processedSVG, fileName) => {
   } else {
     file = path.resolve(process.cwd(), `${fileName}.js`);
   }
-  fs.writeFile(file, processedSVG, function (err) {
+
+  fs.writeFile(file, processedSVG, { flag: args.force ? 'w' : 'wx' }, function (err) {
+    if (err) {
+      if(err.code === 'EEXIST') {
+        printErrors(`Output file ${file} already exists. Use the force (--force) flag to overwrite the existing files`);
+      } else {
+        printErrors(`Output file ${file} not writable`);
+      }
+      return;
+    }
     filesWritten++;
-      if (err) {    
-          return console.log(err);
-      }
 
-      console.log('File written to -> ' + file);
+    console.log('File written to -> ' + file);
 
-      if (filesWritten === fileCount) {
-        console.log(`
-
-          ${filesWritten} components created. That must be some kind of record;
-
-          ${processCompleteText}
-          `)
-
-      }
+    if (filesWritten === fileCount) {
+      console.log(`${filesWritten} components created. That must be some kind of record`);
+      console.log();
+      console.log(processCompleteText);
+      console.log();
+    }
   });
 };
 
 const runUtil = (fileToRead, fileToWrite) => {
   fs.readFile(fileToRead, 'utf8', function (err, file) {
     if (err) {
-      return console.log(err);
+      printErrors(err);
+      return;
     }
 
     const processedSVG = generateComponent(formatSVG(processSVGTags(file)), fileToWrite);
@@ -354,8 +370,19 @@ const runUtilForAllInDir = () => {
   });
 };
 
+
 function snakeToCamel(s){
     return s.replace(/(\-\w)/g, function(m){return m[1].toUpperCase();});
+}
+
+/**
+ * Displays errors in a console friendly way
+ * @param  string text The text to output
+ * @return undefined
+ */
+function printErrors(text) {
+  console.log(chalk.red(text));
+  console.log();
 }
 
 if (firstArg === 'dir') {
