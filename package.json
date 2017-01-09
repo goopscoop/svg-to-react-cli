@@ -1,6 +1,6 @@
 {
   "name": "svg-to-react-cli",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "A command line utility that takes a svg image file and outputs a fully formatted stateless functional React component with `hieght` and `width` for props. With flags to toggle formatting and remove style attributes.",
   "main": "index.js",
   "scripts": {
