@@ -9,14 +9,9 @@
 module.exports = (svgOutput, componentName) =>
 `import React from 'react';
 
-export default function ${componentName}({width = '50px', height = '50px'}) {
+export default function ${componentName}(props) {
   return (
 ${svgOutput.split('\n').map(line => `    ${line}`).join('\n')}
   );
-}
-
-${componentName}.propTypes = {
-  width: React.PropTypes.string,
-  height: React.PropTypes.string
 }
 `;
