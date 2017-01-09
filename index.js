@@ -90,13 +90,30 @@ const runUtil = (fileToRead, fileToWrite) => {
         removeStyle(body);
       }
 
-      // // Add width and height
+      // Add width and height
+      // The order of precedence of how width/height is set on to an element is as follows:
+      // 1st - passed in props are always priority one. This gives run time control to the container
+      // 2nd - svg set width/height is second priority
+      // 3rd - if no props, and no svg width/height, use the viewbox width/height as the width/height
+      // 4th - if no props, svg width/height or viewbox, simlpy set it to 50px/50px
+      let defaultWidth = '50px';
+      let defaultHeight = '50px';
+      if(body.firstChild.hasAttribute('viewBox')) {
+        const [minX, minY, width, height] = body.firstChild.getAttribute('viewBox').split(/[,\s]+/);
+        defaultWidth = width;
+        defaultHeight = height;
+      }
+
       if(! body.firstChild.hasAttribute('width')) {
-        body.firstChild.setAttribute('width', '{width}');
+        body.firstChild.setAttribute('width', defaultWidth);
       }
       if(! body.firstChild.hasAttribute('height')) {
-        body.firstChild.setAttribute('height', '{height}');
+        body.firstChild.setAttribute('height', defaultHeight);
       }
+
+      // Add generic props attribute to parent element, allowing props to be passed to the svg
+      // such as className
+      body.firstChild.setAttribute(':props:', '');
 
       // Now that we are done with manipulating the node/s we can return it back as a string
       output = body.innerHTML;
@@ -104,11 +121,10 @@ const runUtil = (fileToRead, fileToWrite) => {
       // Convert from HTML to JSX
       output = converter.convert(output);
 
-      // Post toText parse for invalid html.
-      // jsdom and htmltojsx will automatically (and correctly) wrap attributes in double quotes.
-      // Just need to pull them back out when they are wrapping our jsx quotes
-      output = output.replace(/"\{width\}"/g, '{width}');
-      output = output.replace(/"\{height\}"/g, '{height}');
+      // jsdom and htmltojsx will automatically (and correctly) wrap attributes in double quotes,
+      // and generally just dislikes all the little markers used by react, such as the spread
+      // operator. We will sub those back in manually now
+      output = output.replace(/:props:/g, '{...props}');
 
       // Format / Prettify JSX
       if(format) {

@@ -19,7 +19,7 @@ or for all files in directory (will name all components in CamelCase based on im
 
 ## Flags
 
-Or use flags: `svgtoreact <svgImage> <ComponentName> output ./components/svgComponents/ no-format rm-style`
+Or use flags: `svgtoreact <svgImage> <ComponentName> --output ./components/svgComponents/ --no-format --rm-style`
 
 **Optional Flags:**
 
@@ -44,9 +44,9 @@ And creates a new file with this:
 ```javascript
 import React from 'react';
 
-export default function NewThing({width = '50px', height = '50px'}) {
+export default function NewThing(props) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height={height} width={width}>
+    <svg xmlns="http://www.w3.org/2000/svg" style={{height: 512, width: 512}} viewBox="0 0 24 24" width={24} height={24} {...props}>
   <defs>
     <filter id="glow">
       <feGaussianBlur stdDeviation="7" result="coloredBlur"></feGaussianBlur>
@@ -66,9 +66,12 @@ export default function NewThing({width = '50px', height = '50px'}) {
 
   );
 }
-
-NewThing.propTypes = {
-  width: React.PropTypes.string,
-  height: React.PropTypes.string
-}
 ```
+
+## Width / height order of precedence
+The order of precedence of how width/height is set on a generated component is as follows:
+
+ - 1 - Passed in width and height props are always priority one. This gives run time control to the container.
+ - 2 - If a svg has its width/height set, this will be the first fallback if width/height props are not provided.
+ - 3 - If the svg has not provided width/height attributes, the svg's viewbox's width/height segments are used as the fallback if width/height props are not provided.
+ - 4 - Finally, if the svg has no width/height attributes, and the svg also doesn't have a viewbox - a fallback of 50px is applied to the width and height
